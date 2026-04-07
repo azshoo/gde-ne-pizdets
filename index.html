@@ -17,14 +17,192 @@
       --not-ok: #ef4444;
       --hover: #94a3b8;
     }
+
     * { box-sizing: border-box; }
-    body { margin: 0; font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: var(--bg); color: var(--text); }
-    .page { max-width: 1200px; margin: 0 auto; padding: 24px; }
-    .card { background: var(--panel); border: 1px solid var(--border); border-radius: 18px; box-shadow: 0 8px 30px rgba(15,23,42,0.06); overflow: hidden; }
-    .header { padding: 20px 24px 8px; }
-    h1 { margin: 0 0 8px; font-size: 28px; }
-    .toolbar { display: flex; justify-content: space-between; padding: 16px 24px; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
-    #map { width: 100%; height: 70vh; }
+
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .page {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      box-shadow: 0 8px 30px rgba(15, 23, 42, 0.06);
+      overflow: hidden;
+    }
+
+    .header {
+      padding: 20px 24px 8px;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 28px;
+      line-height: 1.2;
+    }
+
+    .subtitle {
+      margin: 0;
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 24px;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      background: #fcfdff;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .swatch {
+      width: 14px;
+      height: 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(15, 23, 42, 0.08);
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    button {
+      border: 1px solid var(--border);
+      background: white;
+      color: var(--text);
+      padding: 10px 14px;
+      border-radius: 12px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: 0.15s ease;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 16px rgba(15, 23, 42, 0.08);
+    }
+
+    .map-wrap {
+      padding: 12px;
+    }
+
+    #map {
+      width: 100%;
+      height: 68vh;
+      min-height: 520px;
+      border-radius: 14px;
+      overflow: hidden;
+    }
+
+    .lists {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+      padding: 0 24px 24px;
+    }
+
+    .list-card {
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 16px;
+      background: #fff;
+      min-height: 220px;
+    }
+
+    .list-card h2 {
+      margin: 0 0 12px;
+      font-size: 18px;
+    }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      max-height: 340px;
+      overflow: auto;
+      align-content: flex-start;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      font-size: 14px;
+      background: #f8fafc;
+      line-height: 1.2;
+    }
+
+    .chip.ok {
+      background: rgba(34, 197, 94, 0.08);
+      border-color: rgba(34, 197, 94, 0.18);
+    }
+
+    .chip.not-ok {
+      background: rgba(239, 68, 68, 0.08);
+      border-color: rgba(239, 68, 68, 0.18);
+    }
+
+    .chip.none {
+      background: rgba(148, 163, 184, 0.08);
+      border-color: rgba(148, 163, 184, 0.18);
+    }
+
+    .empty {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .count {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 500;
+      margin-left: 6px;
+    }
+
+    @media (max-width: 1100px) {
+      .lists {
+        grid-template-columns: 1fr;
+      }
+
+      #map {
+        min-height: 420px;
+        height: 58vh;
+      }
+    }
   </style>
 </head>
 <body>
@@ -32,11 +210,41 @@
     <div class="card">
       <div class="header">
         <h1>Где НЕ пиздец</h1>
+        <p class="subtitle">Клик по стране переключает статус: не отмечено → OK → NOT OK → не отмечено</p>
       </div>
+
       <div class="toolbar">
-        <button id="resetBtn">Сброс</button>
+        <div class="legend">
+          <span class="legend-item"><span class="swatch" style="background: var(--default)"></span>Пока не понятно</span>
+          <span class="legend-item"><span class="swatch" style="background: var(--ok)"></span>НЕ пиздец</span>
+          <span class="legend-item"><span class="swatch" style="background: var(--not-ok)"></span>Пиздец</span>
+        </div>
+
+        <div class="actions">
+          <button id="resetBtn">Сбросить всё</button>
+        </div>
       </div>
-      <div id="map"></div>
+
+      <div class="map-wrap">
+        <div id="map"></div>
+      </div>
+
+      <div class="lists">
+        <section class="list-card">
+          <h2>НЕ пиздец <span class="count" id="okCount"></span></h2>
+          <div class="chips" id="okList"></div>
+        </section>
+
+        <section class="list-card">
+          <h2>Пиздец <span class="count" id="notOkCount"></span></h2>
+          <div class="chips" id="notOkList"></div>
+        </section>
+
+        <section class="list-card">
+          <h2>Пока не понятно <span class="count" id="noneCount"></span></h2>
+          <div class="chips" id="noneList"></div>
+        </section>
+      </div>
     </div>
   </div>
 
@@ -44,6 +252,10 @@
   <script src="https://cdn.jsdelivr.net/npm/jsvectormap/dist/maps/world.js"></script>
   <script>
     const state = {};
+    let allCodes = [];
+    const displayNames = typeof Intl !== 'undefined' && Intl.DisplayNames
+      ? new Intl.DisplayNames(['ru'], { type: 'region' })
+      : null;
 
     function next(v) {
       if (!v) return 'ok';
@@ -57,38 +269,87 @@
       return '#cbd5e1';
     }
 
+    function emojiFlag(code) {
+      return String.fromCodePoint(...code.toUpperCase().split('').map(char => 127397 + char.charCodeAt()));
+    }
+
+    function countryName(code) {
+      try {
+        return displayNames ? displayNames.of(code) : code;
+      } catch (e) {
+        return code;
+      }
+    }
+
+    function chipHtml(code, cls) {
+      return '<span class="chip ' + cls + '">' + emojiFlag(code) + ' ' + countryName(code) + '</span>';
+    }
+
     const map = new jsVectorMap({
       selector: '#map',
-      map: 'world'
+      map: 'world',
+      zoomButtons: true,
+      regionStyle: {
+        initial: { fill: '#cbd5e1', stroke: '#ffffff', strokeWidth: 1 },
+        hover: { fill: '#94a3b8' }
+      },
+      onRegionTooltipShow(event, tooltip, code) {
+        const current = state[code];
+        const label = current === 'ok' ? 'НЕ пиздец' : current === 'not_ok' ? 'Пиздец' : 'Пока не понятно';
+        tooltip.text(emojiFlag(code) + ' ' + countryName(code) + ' — ' + label);
+      }
     });
 
     function repaint() {
       document.querySelectorAll('#map svg [data-code]').forEach(el => {
         const code = el.getAttribute('data-code');
         el.style.fill = color(state[code]);
+        el.style.cursor = 'pointer';
       });
     }
 
+    function renderLists() {
+      const ok = allCodes.filter(code => state[code] === 'ok').sort((a, b) => countryName(a).localeCompare(countryName(b), 'ru'));
+      const notOk = allCodes.filter(code => state[code] === 'not_ok').sort((a, b) => countryName(a).localeCompare(countryName(b), 'ru'));
+      const none = allCodes.filter(code => !state[code]).sort((a, b) => countryName(a).localeCompare(countryName(b), 'ru'));
+
+      document.getElementById('okCount').textContent = '(' + ok.length + ')';
+      document.getElementById('notOkCount').textContent = '(' + notOk.length + ')';
+      document.getElementById('noneCount').textContent = '(' + none.length + ')';
+
+      document.getElementById('okList').innerHTML = ok.length ? ok.map(code => chipHtml(code, 'ok')).join('') : '<div class="empty">Пока пусто</div>';
+      document.getElementById('notOkList').innerHTML = notOk.length ? notOk.map(code => chipHtml(code, 'not-ok')).join('') : '<div class="empty">Пока пусто</div>';
+      document.getElementById('noneList').innerHTML = none.length ? none.map(code => chipHtml(code, 'none')).join('') : '<div class="empty">Все страны уже размечены</div>';
+    }
+
+    function renderAll() {
+      repaint();
+      renderLists();
+    }
+
     function bind() {
-      document.querySelectorAll('#map svg [data-code]').forEach(el => {
+      const regions = [...document.querySelectorAll('#map svg [data-code]')];
+      allCodes = regions.map(el => el.getAttribute('data-code')).filter(Boolean).sort();
+
+      regions.forEach(el => {
         el.onclick = () => {
           const code = el.getAttribute('data-code');
           const n = next(state[code]);
           if (!n) delete state[code]; else state[code] = n;
-          repaint();
+          renderAll();
         };
       });
     }
 
     document.getElementById('resetBtn').onclick = () => {
       Object.keys(state).forEach(k => delete state[k]);
-      repaint();
+      renderAll();
     };
 
     window.onload = () => {
       setTimeout(() => {
         bind();
-        repaint();
+        renderAll();
       }, 50);
     };
   </script>
