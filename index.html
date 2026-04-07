@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Где НЕ пиздец</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsvectormap/dist/css/jsvectormap.min.css" />
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --panel: #ffffff;
+      --text: #0f172a;
+      --muted: #475569;
+      --border: #e2e8f0;
+      --default: #cbd5e1;
+      --ok: #22c55e;
+      --not-ok: #ef4444;
+      --hover: #94a3b8;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: var(--bg); color: var(--text); }
+    .page { max-width: 1200px; margin: 0 auto; padding: 24px; }
+    .card { background: var(--panel); border: 1px solid var(--border); border-radius: 18px; box-shadow: 0 8px 30px rgba(15,23,42,0.06); overflow: hidden; }
+    .header { padding: 20px 24px 8px; }
+    h1 { margin: 0 0 8px; font-size: 28px; }
+    .toolbar { display: flex; justify-content: space-between; padding: 16px 24px; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+    #map { width: 100%; height: 70vh; }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="card">
+      <div class="header">
+        <h1>Где НЕ пиздец</h1>
+      </div>
+      <div class="toolbar">
+        <button id="resetBtn">Сброс</button>
+      </div>
+      <div id="map"></div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/jsvectormap"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jsvectormap/dist/maps/world.js"></script>
+  <script>
+    const state = {};
+
+    function next(v) {
+      if (!v) return 'ok';
+      if (v === 'ok') return 'not_ok';
+      return undefined;
+    }
+
+    function color(v) {
+      if (v === 'ok') return '#22c55e';
+      if (v === 'not_ok') return '#ef4444';
+      return '#cbd5e1';
+    }
+
+    const map = new jsVectorMap({
+      selector: '#map',
+      map: 'world'
+    });
+
+    function repaint() {
+      document.querySelectorAll('#map svg [data-code]').forEach(el => {
+        const code = el.getAttribute('data-code');
+        el.style.fill = color(state[code]);
+      });
+    }
+
+    function bind() {
+      document.querySelectorAll('#map svg [data-code]').forEach(el => {
+        el.onclick = () => {
+          const code = el.getAttribute('data-code');
+          const n = next(state[code]);
+          if (!n) delete state[code]; else state[code] = n;
+          repaint();
+        };
+      });
+    }
+
+    document.getElementById('resetBtn').onclick = () => {
+      Object.keys(state).forEach(k => delete state[k]);
+      repaint();
+    };
+
+    window.onload = () => {
+      setTimeout(() => {
+        bind();
+        repaint();
+      }, 50);
+    };
+  </script>
+</body>
+</html>
