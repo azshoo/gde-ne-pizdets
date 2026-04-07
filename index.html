@@ -320,6 +320,10 @@
       } catch (error) {}
     }
 
+    function isValidCountryCode(code) {
+      return /^[A-Z]{2}$/.test(code);
+    }
+
     function next(value) {
       if (!value) return 'ok';
       if (value === 'ok') return 'not_ok';
@@ -327,6 +331,7 @@
     }
 
     function setStatus(code, status) {
+      if (!isValidCountryCode(code)) return;
       if (!status || status === 'none') {
         delete state[code];
       } else {
@@ -343,6 +348,7 @@
     }
 
     function countryName(code) {
+      if (!isValidCountryCode(code)) return '';
       try {
         return displayNames ? displayNames.of(code) : code;
       } catch (error) {
@@ -351,7 +357,7 @@
     }
 
     function flagUrl(code) {
-      return 'https://flagcdn.com/w40/' + code.toLowerCase() + '.png';
+      return isValidCountryCode(code) ? 'https://flagcdn.com/w40/' + code.toLowerCase() + '.png' : '';
     }
 
     function tooltipLabel(code) {
@@ -361,7 +367,7 @@
 
     function updateTooltip() {
       const tooltip = document.querySelector('.jvm-tooltip');
-      if (!tooltip || !hoveredCode) return;
+      if (!tooltip || !hoveredCode || !isValidCountryCode(hoveredCode)) return;
       tooltip.textContent = countryName(hoveredCode) + ' — ' + tooltipLabel(hoveredCode);
     }
 
@@ -402,6 +408,10 @@
       },
       onRegionTooltipShow(event, tooltip, code) {
         hoveredCode = code;
+        if (!isValidCountryCode(code)) {
+          tooltip.hide();
+          return;
+        }
         tooltip.text(countryName(code) + ' — ' + tooltipLabel(code));
       }
     });
@@ -409,6 +419,7 @@
     function repaint() {
       document.querySelectorAll('#map svg [data-code]').forEach((el) => {
         const code = el.getAttribute('data-code');
+        if (!isValidCountryCode(code)) return;
         el.style.fill = color(state[code]);
         el.style.cursor = 'pointer';
       });
@@ -438,15 +449,19 @@
 
     function bindMapRegions() {
       const regions = [...document.querySelectorAll('#map svg [data-code]')];
-      allCodes = regions.map((el) => el.getAttribute('data-code')).filter(Boolean).sort();
+      allCodes = regions
+        .map((el) => el.getAttribute('data-code'))
+        .filter((code) => isValidCountryCode(code))
+        .sort();
 
       regions.forEach((el) => {
+        const code = el.getAttribute('data-code');
+        if (!isValidCountryCode(code)) return;
         el.onclick = () => {
-          const code = el.getAttribute('data-code');
           setStatus(code, next(state[code]));
         };
         el.addEventListener('mouseenter', () => {
-          hoveredCode = el.getAttribute('data-code');
+          hoveredCode = code;
           updateTooltip();
         });
         el.addEventListener('mouseleave', () => {
